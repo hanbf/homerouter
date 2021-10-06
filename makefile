@@ -1,4 +1,11 @@
-all: ~/.vimrc ~/.gitconfig ~/.my.zshrc /etc/systemd/system/sslocal.service /etc/iptables/rules.v4 /etc/dnscrypt-proxy/dnscrypt-proxy.toml
+all: ~/.vimrc ~/.gitconfig ~/.my.zshrc \
+	/etc/systemd/system/sslocal.service \
+	/etc/iptables/rules.v4 \
+	/etc/dnscrypt-proxy/dnscrypt-proxy.toml \
+	/etc/dnsmasq.conf \
+	/etc/systemd/resolved.conf.d/00-use-dnsmasq.conf \
+	/lib/systemd/system/dnscrypt-proxy.socket \
+	/etc/systemd/system/systemd-networkd-wait-online.service
 
 ~/.vimrc: vimrc
 	cp vimrc ~/.vimrc
@@ -23,7 +30,23 @@ all: ~/.vimrc ~/.gitconfig ~/.my.zshrc /etc/systemd/system/sslocal.service /etc/
 	sudo systemctl restart dnscrypt-proxy
 	echo "dnscrypt-proxy updated, need to reboot"
 
+/etc/systemd/resolved.conf.d/00-use-dnsmasq.conf: 00-use-dnsmasq.conf
+	sudo mkdir -p /etc/systemd/resolved.conf.d
+	sudo cp 00-use-dnsmasq.conf /etc/systemd/resolved.conf.d
+	sudo systemctl restart systemd-resolved.service
+	echo "systemd-resolved updated, need to reboot"
+
+/etc/systemd/system/systemd-networkd-wait-online.service: systemd-networkd-wait-online.service
+	sudo cp systemd-networkd-wait-online.service /etc/systemd/system/
+
+/lib/systemd/system/dnscrypt-proxy.socket: dnscrypt-proxy.socket
+	sudo cp dnscrypt-proxy.socket /lib/systemd/system/dnscrypt-proxy.socket
+	sudo systemctl daemon-reload
+	sudo systemctl restart dnscrypt-proxy
+	echo "dnscrypt-proxy updated, need to reboot"
+
 /etc/systemd/system/sslocal.service: sslocal.service
 	sudo cp sslocal.service /etc/systemd/system/
-	sudo systemctl reenable sslocal
+	sudo systemctl daemon-reload
+	sudo systemctl restart sslocal
 	echo "sslocal.service updated, need to reboot"
