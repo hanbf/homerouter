@@ -5,7 +5,8 @@ all: ~/.vimrc ~/.gitconfig ~/.my.zshrc \
 	/etc/dnsmasq.conf \
 	/etc/systemd/resolved.conf.d/00-use-dnsmasq.conf \
 	/lib/systemd/system/dnscrypt-proxy.socket \
-	/etc/systemd/system/systemd-networkd-wait-online.service
+	/etc/systemd/system/systemd-networkd-wait-online.service \
+	/etc/netplan/99-netplan-setup.yaml
 
 ~/.vimrc: vimrc
 	cp vimrc ~/.vimrc
@@ -19,6 +20,8 @@ all: ~/.vimrc ~/.gitconfig ~/.my.zshrc \
 /etc/iptables/rules.v4: init-iptables.sh
 	sudo ./init-iptables.sh
 	sudo iptables -L -v
+	sudo iptables -t nat -L -v
+	sudo iptables -t mangle -L -v
 
 /etc/dnsmasq.conf: dnsmasq.conf
 	sudo cp dnsmasq.conf /etc/dnsmasq.conf
@@ -50,3 +53,10 @@ all: ~/.vimrc ~/.gitconfig ~/.my.zshrc \
 	sudo systemctl daemon-reload
 	sudo systemctl restart sslocal
 	echo "sslocal.service updated, need to reboot"
+
+/etc/netplan/99-netplan-setup.yaml: 99-netplan-setup.yaml
+	sudo cp 99-netplan-setup.yaml /etc/netplan/
+	echo "netplan updated, restarting networkd, be prepared to be offline"
+	sudo systemctl restart systemd-networkd.service
+	sudo netplan apply
+
