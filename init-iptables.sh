@@ -18,6 +18,9 @@ iptables -t filter -A INPUT -i enp1s0 -m conntrack --ctstate NEW -j DROP
 # enp2s0 connects the home LAN, DHCP is opened in this interface.
 iptables -t filter -A INPUT -i enp2s0 -j ACCEPT
 
+# enp3s0 connects the home LAN, DHCP is opened in this interface.
+iptables -t filter -A INPUT -i enp3s0 -j ACCEPT
+
 # Accept packages from router itself
 iptables -t filter -A INPUT -i lo -j ACCEPT
 
@@ -26,12 +29,14 @@ iptables -t filter -A INPUT -j DROP
 
 iptables -t filter -A OUTPUT -j ACCEPT
 
-# Forward all packets between enp1s0 and enp2s0
+# Forward all packets between enp1s0, enp2s0, enp3s0
 iptables -t filter -A FORWARD -i enp1s0 -j ACCEPT
 iptables -t filter -A FORWARD -i enp2s0 -j ACCEPT 
+iptables -t filter -A FORWARD -i enp3s0 -j ACCEPT 
 
 iptables -t filter -A FORWARD -o enp1s0 -j ACCEPT
 iptables -t filter -A FORWARD -o enp2s0 -j ACCEPT
+iptables -t filter -A FORWARD -o enp3s0 -j ACCEPT
 
 # Drop all other FORWARD packets
 iptables -t filter -A FORWARD -j DROP
